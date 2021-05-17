@@ -1,0 +1,7 @@
+\.*
+extensions/
+py/
+target/
+*.jar
+/jsext.js
+js.zip
