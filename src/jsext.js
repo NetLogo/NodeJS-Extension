@@ -14,6 +14,12 @@ let ASSN_MSG = 2
 let SUCC_MSG = 0
 let ERR_MSG = 1
 
+// re-exporting node "pseudo-globals" to actual global scope so that client JS code
+// can access them.
+// https://nodejs.org/en/knowledge/getting-started/globals-in-node-js/
+global["require"] = require
+global["module"] = module
+
 function write_obj(sock, obj) {
     sock.write(JSON.stringify(obj) + "\n");
 }
@@ -58,8 +64,8 @@ function handle_assignment(sock, body) {
     if (body.hasOwnProperty("varName") && body.hasOwnProperty("value")) {
         let varName = body["varName"];
         let value = body["value"];
-        console.log("assn:", varName, value);
-        let assn_status = global_scope_eval('var ' + varName + ' = ' + JSON.stringify(value) + ';');
+        // console.log("assn:", varName, value);
+        global_scope_eval('var ' + varName + ' = ' + JSON.stringify(value) + ';');
         let out = {
             "type" : SUCC_MSG,
             "body" : ""
@@ -110,7 +116,14 @@ const server = net.createServer((sock) => {
     console.log("could not create listener: ", err);
 })
 
-server.listen(1337, () => {
-    // console.log("listening on:", server.address().port);
-    console.log(server.address().port);
-})
+if (process.argv.length === 3) {
+    let port = +process.argv[3]
+    server.listen(port, () => {
+        console.log(server.address().port)
+    })
+} else {
+    server.listen(() => {
+        console.log(server.address().port);
+    })
+}
+

@@ -55,15 +55,9 @@ class JSExtension extends DefaultClassManager {
 }
 
 object SetupNode extends api.Command {
-  override def getSyntax: Syntax = Syntax.commandSyntax(right = List(Syntax.ListType))
+  override def getSyntax: Syntax = Syntax.commandSyntax(right = List())
 
   override def perform(args: Array[Argument], context: Context): Unit = {
-
-    // TODO: Because of the way the global eval works, require() doesn't work. Without changing the subprocess api to
-    // add another type of message or add custom messages, I think the best workaround is to allow the user to add
-    // in a few lines of code as a "warmup" step and we just prepend them to jsext.js before runtime.
-    // That said, this might be a message that I need to add more/arbitrarily many message types.
-
     val jsScript: String = new File(JSExtension.extDirectory, "jsext.js").toString
     try {
       JSExtension.nodeProcess = Subprocess.start(context.workspace, Seq("node"), Seq(jsScript), "js", "Node.js Javascript")
@@ -82,7 +76,7 @@ object Run extends api.Command {
   )
 
   override def perform(args: Array[Argument], context: Context): Unit =
-    JSExtension.nodeProcess.exec(args.map(_.getString).mkString("\n")).get.get
+    JSExtension.nodeProcess.exec(args.map(_.getString).mkString("\n"))
 }
 
 object RunResult extends api.Reporter {
@@ -92,11 +86,11 @@ object RunResult extends api.Reporter {
   )
 
   override def report(args: Array[Argument], context: Context): AnyRef =
-    JSExtension.nodeProcess.eval(args.map(_.getString).mkString("\n")).get.get
+    JSExtension.nodeProcess.eval(args.map(_.getString).mkString("\n"))
 }
 
 object Set extends api.Command {
   override def getSyntax: Syntax = Syntax.commandSyntax(right = List(Syntax.StringType, Syntax.ReadableType))
   override def perform(args: Array[Argument], context: Context): Unit =
-    JSExtension.nodeProcess.assign(args(0).getString, args(1).get).get.get
+    JSExtension.nodeProcess.assign(args(0).getString, args(1).get)
 }
