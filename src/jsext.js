@@ -9,6 +9,7 @@ const global_scope_eval = eval;
 let STMT_MSG = 0
 let EXPR_MSG = 1
 let ASSN_MSG = 2
+let EXPR_MSG_STRINGIFIED = 3
 
 // Out
 let SUCC_MSG = 0
@@ -60,6 +61,15 @@ function handle_expression(sock, body) {
     write_obj(sock, out);
 }
 
+function handle_expression_stringified(sock, body) {
+    let res = String(global_scope_eval(body))
+    let out = {
+        "type" : SUCC_MSG,
+        "body" : res
+    }
+    write_obj(sock, out);
+}
+
 function handle_assignment(sock, body) {
     if (body.hasOwnProperty("varName") && body.hasOwnProperty("value")) {
         let varName = body["varName"];
@@ -92,6 +102,9 @@ const server = net.createServer((sock) => {
                         break;
                     case ASSN_MSG:
                         handle_assignment(sock, body);
+                        break;
+                    case EXPR_MSG_STRINGIFIED:
+                        handle_expression_stringified(sock, body);
                         break;
                     default:
                         send_error(sock, "Bad message type:" + type, "");
