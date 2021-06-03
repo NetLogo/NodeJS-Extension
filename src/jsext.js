@@ -1,5 +1,6 @@
 const net = require('net');
 const readline = require('readline');
+const util = require('util');
 
 // see https://262.ecma-international.org/5.1/#sec-10.4.2
 // or  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval
@@ -62,7 +63,7 @@ function handle_expression(sock, body) {
 }
 
 function handle_expression_stringified(sock, body) {
-    let res = String(global_scope_eval(body))
+    let res = util.inspect(global_scope_eval(body))
     let out = {
         "type" : SUCC_MSG,
         "body" : res
