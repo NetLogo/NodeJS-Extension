@@ -2,7 +2,7 @@ package org.nlogo.extensions.js
 
 import com.fasterxml.jackson.core.JsonParser
 import org.json4s.jackson.JsonMethods.mapper
-import org.me.Subprocess
+import org.me.{ShellWindow, Subprocess}
 import org.nlogo.api
 import org.nlogo.api._
 import org.nlogo.core.Syntax
@@ -11,6 +11,7 @@ import java.io.File
 
 object JSExtension {
   private var _nodeProcess: Option[Subprocess] = None
+  var shellWindow = new ShellWindow()
 
   val extDirectory: File = new File(
     getClass.getClassLoader.asInstanceOf[java.net.URLClassLoader].getURLs()(0).toURI.getPath
@@ -44,6 +45,7 @@ class JSExtension extends DefaultClassManager {
   override def runOnce(em: ExtensionManager): Unit = {
     super.runOnce(em)
     mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
+    JSExtension.shellWindow.setVisible(true)
   }
 
   override def unload(em: ExtensionManager): Unit = {
@@ -58,7 +60,9 @@ object SetupNode extends api.Command {
   override def perform(args: Array[Argument], context: Context): Unit = {
     val jsScript: String = new File(JSExtension.extDirectory, "jsext.js").toString
     try {
+      JSExtension.killNode()
       JSExtension.nodeProcess = Subprocess.start(context.workspace, Seq("node"), Seq(jsScript), "js", "Node.js Javascript")
+      JSExtension.shellWindow.eval_stringified = Some(JSExtension.nodeProcess.evalStringified)
     } catch {
       case e: Exception => {
         println(e)
