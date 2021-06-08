@@ -5,9 +5,12 @@ import org.json4s.jackson.JsonMethods.mapper
 import org.me.{ShellWindow, Subprocess}
 import org.nlogo.api
 import org.nlogo.api._
+import org.nlogo.app.App
 import org.nlogo.core.Syntax
 
+import java.awt.GraphicsEnvironment
 import java.io.File
+import javax.swing.JMenu
 
 object JSExtension {
   private var _nodeProcess: Option[Subprocess] = None
@@ -31,10 +34,11 @@ object JSExtension {
     _nodeProcess.foreach(_.close())
     _nodeProcess = None
   }
-
 }
 
 class JSExtension extends DefaultClassManager {
+  var extensionMenu: Option[JMenu] = None
+
   def load(manager: PrimitiveManager): Unit = {
     manager.addPrimitive("setup", SetupNode)
     manager.addPrimitive("run", Run)
@@ -45,12 +49,25 @@ class JSExtension extends DefaultClassManager {
   override def runOnce(em: ExtensionManager): Unit = {
     super.runOnce(em)
     mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
-    JSExtension.shellWindow.setVisible(true)
+
+    if (!GraphicsEnvironment.isHeadless) {
+      val menuBar = App.app.frame.getJMenuBar
+
+      menuBar.getComponents.collectFirst {
+        case mi: JMenu if mi.getText == ExtensionMenu.name => mi
+      }.getOrElse {
+        extensionMenu = Option(menuBar.add(new ExtensionMenu))
+      }
+    }
   }
 
   override def unload(em: ExtensionManager): Unit = {
     super.unload(em);
     JSExtension.killNode()
+    JSExtension.shellWindow.setVisible(false)
+    if (!GraphicsEnvironment.isHeadless) {
+      extensionMenu.foreach(App.app.frame.getJMenuBar.remove(_))
+    }
   }
 }
 
@@ -95,4 +112,14 @@ object Set extends api.Command {
   override def getSyntax: Syntax = Syntax.commandSyntax(right = List(Syntax.StringType, Syntax.ReadableType))
   override def perform(args: Array[Argument], context: Context): Unit =
     JSExtension.nodeProcess.assign(args(0).getString, args(1).get)
+}
+
+object ExtensionMenu {
+  val name = "JSExtension"
+}
+
+class ExtensionMenu extends JMenu("JSExtension") {
+  add("Pop-out Interpreter").addActionListener{ _ =>
+    JSExtension.shellWindow.setVisible(!JSExtension.shellWindow.isVisible)
+  }
 }
