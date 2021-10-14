@@ -14,7 +14,7 @@ import javax.swing.JMenu
 
 object JSExtension {
   private var _nodeProcess: Option[Subprocess] = None
-  var shellWindow = new ShellWindow()
+  var shellWindow : Option[ShellWindow] = None
 
   val extDirectory: File = new File(
     getClass.getClassLoader.asInstanceOf[java.net.URLClassLoader].getURLs()(0).toURI.getPath
@@ -51,6 +51,8 @@ class JSExtension extends DefaultClassManager {
     mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
 
     if (!GraphicsEnvironment.isHeadless) {
+      JSExtension.shellWindow = Some(new ShellWindow())
+
       val menuBar = App.app.frame.getJMenuBar
 
       menuBar.getComponents.collectFirst {
@@ -64,7 +66,7 @@ class JSExtension extends DefaultClassManager {
   override def unload(em: ExtensionManager): Unit = {
     super.unload(em);
     JSExtension.killNode()
-    JSExtension.shellWindow.setVisible(false)
+    JSExtension.shellWindow.foreach(sw => sw.setVisible(false))
     if (!GraphicsEnvironment.isHeadless) {
       extensionMenu.foreach(App.app.frame.getJMenuBar.remove(_))
     }
@@ -79,7 +81,7 @@ object SetupNode extends api.Command {
     try {
       JSExtension.killNode()
       JSExtension.nodeProcess = Subprocess.start(context.workspace, Seq("node"), Seq(jsScript), "js", "Node.js Javascript")
-      JSExtension.shellWindow.eval_stringified = Some(JSExtension.nodeProcess.evalStringified)
+      JSExtension.shellWindow.foreach(sw => sw.eval_stringified = Some(JSExtension.nodeProcess.evalStringified))
     } catch {
       case e: Exception => {
         println(e)
@@ -120,6 +122,6 @@ object ExtensionMenu {
 
 class ExtensionMenu extends JMenu("JSExtension") {
   add("Pop-out Interpreter").addActionListener{ _ =>
-    JSExtension.shellWindow.setVisible(!JSExtension.shellWindow.isVisible)
+    JSExtension.shellWindow.map(sw => sw.setVisible(!sw.isVisible))
   }
 }
