@@ -111,7 +111,7 @@ object RunResult extends api.Reporter {
 }
 
 object Set extends api.Command {
-  override def getSyntax: Syntax = Syntax.commandSyntax(right = List(Syntax.StringType, Syntax.ReadableType))
+  override def getSyntax: Syntax = Syntax.commandSyntax(right = List(Syntax.StringType, Subprocess.convertibleTypesSyntax))
   override def perform(args: Array[Argument], context: Context): Unit =
     JSExtension.nodeProcess.assign(args(0).getString, args(1).get)
 }

@@ -4,6 +4,7 @@ const util = require('util');
 
 // see https://262.ecma-international.org/5.1/#sec-10.4.2
 // or  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval
+// JS is really weird
 const global_scope_eval = eval;
 
 // In
