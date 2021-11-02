@@ -2,32 +2,13 @@ const net = require('net');
 const readline = require('readline');
 const util = require('util');
 
-//--------------------------------Overview-------------------------------------
-// The language specific code needs to do a few things
-// * Create a tcp server on localhost
-// * listen for messages from the NetLogo extension
-// * Execute/evaluate the code coming in those messages using something like
-//   `eval`
-// * Return the results back to the extension
-// * Give error information if anything goes wrong or if the code passed in
-//   throws any exceptions
-//
-// Input messages have 4 types, statements, expressions, assignment, and
-// stringified expressions. Statements should be executed, expressions
-// should be evaluated (and return a result), assignments should assign
-// the result of an evaluation to a variable with the given nane, and
-// stringified expressions should be evaluated, but converted into a helpful
-// string representation before being returned to the extension
-//
-// Output messages have two types, success and failure. Failure should be
-// accompanied by a cause of the failure.
-//
+// See the README for the NetLogo Extension Language Server Library for the server specification.
+
+//-----------------------------JS specific weird stuff-------------------------
 // The only JS-specific weird stuff here has to do with the way JS handles eval
 // and how to make the node.js features like require work within the eval
 // execution environment.
 
-
-//-----------------------------JS specific weird stuff-------------------------
 // see https://262.ecma-international.org/5.1/#sec-10.4.2
 // or  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval
 const global_scope_eval = eval;
@@ -40,13 +21,13 @@ global["module"] = module
 
 //------------------------------Utilities--------------------------------------
 
-// In
+// Input message types
 let STMT_MSG = 0
 let EXPR_MSG = 1
 let ASSN_MSG = 2
 let EXPR_MSG_STRINGIFIED = 3
 
-// Out
+// Output mesage types
 let SUCC_MSG = 0
 let ERR_MSG = 1
 
