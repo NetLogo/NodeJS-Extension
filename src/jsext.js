@@ -27,14 +27,25 @@ let EXPR_MSG = 1
 let ASSN_MSG = 2
 let EXPR_MSG_STRINGIFIED = 3
 
-// Output mesage types
+// Output message types
 let SUCC_MSG = 0
 let ERR_MSG = 1
 
+/**
+ * Serialize and write a json object to a given socket
+ * @param sock the socket to write to
+ * @param obj the object itself
+ */
 function write_obj(sock, obj) {
     sock.write(JSON.stringify(obj) + "\n");
 }
 
+/**
+ * Send an error message over the socket
+ * @param sock the socket to write to
+ * @param message a short error message
+ * @param cause a longer error message that elaborates on the first
+ */
 function send_error(sock, message, cause) {
     let err_msg = {
         "type" : ERR_MSG,
@@ -47,15 +58,24 @@ function send_error(sock, message, cause) {
     write_obj(sock, err_msg)
 }
 
+/**
+ * Unpack an exception into an error message and send it across the socket
+ * @param sock the socket to write to
+ * @param e the exception itself
+ */
 function handle_exception(sock, e) {
     send_error(sock, e["name"], e["message"]);
 }
 
 //----------------------------Handle messages----------------------------------
 
+/**
+ * Handle an assignment message from NetLogo
+ * @param sock the socket to write the output message to
+ * @param body the incoming message
+ */
 function handle_statement(sock, body) {
     let res = global_scope_eval(body);
-    // console.log("stmt:", res);
     let out = {
         "type" : SUCC_MSG,
         "body" : ""
@@ -63,9 +83,13 @@ function handle_statement(sock, body) {
     write_obj(sock, out);
 }
 
+/**
+ * Handle an expression message from NetLogo
+ * @param sock the socket to write the output message to
+ * @param body the incoming message
+ */
 function handle_expression(sock, body) {
     let res = global_scope_eval(body);
-    // console.log("expr:", res);
     let out = {
         "type" : SUCC_MSG,
         "body" : res
@@ -73,6 +97,11 @@ function handle_expression(sock, body) {
     write_obj(sock, out);
 }
 
+/**
+ * Handle a stringified expression message from NetLogo
+ * @param sock the socket to write the output message to
+ * @param body the incoming message
+ */
 function handle_expression_stringified(sock, body) {
     let res = util.inspect(global_scope_eval(body))
     let out = {
@@ -82,11 +111,15 @@ function handle_expression_stringified(sock, body) {
     write_obj(sock, out);
 }
 
+/**
+ * Handle an assignment message from NetLogo
+ * @param sock the socket to write the output message to
+ * @param body the incoming message
+ */
 function handle_assignment(sock, body) {
     if (body.hasOwnProperty("varName") && body.hasOwnProperty("value")) {
         let varName = body["varName"];
         let value = body["value"];
-        // console.log("assn:", varName, value);
         global_scope_eval('var ' + varName + ' = ' + JSON.stringify(value) + ';');
         let out = {
             "type" : SUCC_MSG,
