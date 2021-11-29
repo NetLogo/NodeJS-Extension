@@ -2,7 +2,7 @@ package org.nlogo.extensions.js
 
 import com.fasterxml.jackson.core.JsonParser
 import org.json4s.jackson.JsonMethods.mapper
-import org.me.{ShellWindow, Subprocess}
+import org.nlogo.langextension.{ShellWindow, Subprocess}
 import org.nlogo.api
 import org.nlogo.api._
 import org.nlogo.app.App
