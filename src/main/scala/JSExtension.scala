@@ -100,7 +100,7 @@ object SetupNode extends api.Command {
       JSExtension.nodeProcess = Subprocess.start(context.workspace, Seq("node"), Seq(jsScript), "js", "Node.js Javascript")
       // Set the method that the shell window will call to evaluate expressions. In this case, we just go straight
       // to the evalStringified method of the subprocess
-      JSExtension.shellWindow.foreach(sw => sw.eval_stringified = Some(JSExtension.nodeProcess.evalStringified))
+      JSExtension.shellWindow.foreach(sw => sw.setEvalStringified(Some(JSExtension.nodeProcess.evalStringified)))
     } catch {
       case e: Exception => {
         throw new ExtensionException("The subprocess didn't want to start", e)
