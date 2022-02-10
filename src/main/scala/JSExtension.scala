@@ -121,7 +121,7 @@ object Run extends api.Command {
 
 object RunResult extends api.Reporter {
   override def getSyntax: Syntax = Syntax.reporterSyntax(
-    right = List(Syntax.StringType | Syntax.RepeatableType),
+    right = List(Syntax.StringType),
     ret = Syntax.WildcardType
   )
 
@@ -141,9 +141,9 @@ object ExtensionMenu {
   val name = "JSExtension"
 }
 
-// The extension menu bar item. In this case, it just has the one drop down item, toggling the pop out interpreter.
+// The extension menu bar item. In this case, it just has the one drop down item, toggling the interactive JS console.
 class ExtensionMenu extends JMenu("JSExtension") {
-  add("Pop-out Interpreter").addActionListener{ _ =>
+  add("Interactive JS Console").addActionListener{ _ =>
     JSExtension.shellWindow.map(sw => sw.setVisible(!sw.isVisible))
   }
 }
