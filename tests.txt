@@ -1,0 +1,27 @@
+smoke-test
+  extensions [ js ]
+  O> js:setup
+  js:runresult "[1, 2, 3].reduce((a, b) => a + b)" => 6
+
+node-require-built-ins
+  extensions [ js ]
+  O> js:setup
+  O> js:run "var util = require('util')"
+  js:runresult "util.format('The answer is %d', 42)" => "The answer is 42"
+
+all-commands
+  extensions [ js ]
+  O> js:setup
+  O> js:run "var a = 5"
+  js:runresult "a" => 5
+  O> js:set "b" 10
+  js:runresult "b" => 10
+
+serialization
+  extensions [ js ]
+  O> js:setup
+  O> js:set "a" [1 2 3]
+  js:runresult "a" => [1 2 3]
+  O> js:run "var b = {'a' : 1, 'b' : 2}"
+  js:runresult "b" => [["a" 1] ["b" 2]]
+
