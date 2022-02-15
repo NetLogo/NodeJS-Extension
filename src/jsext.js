@@ -50,8 +50,8 @@ function send_error(sock, message, longMessage) {
     let err_msg = {
         "type" : ERR_MSG,
         "body" : {
-            "message" : message,
-            "longMessage"   : longMessage
+            "message" : String(message),
+            "longMessage"   : String(longMessage)
         }
     }
     write_obj(sock, err_msg)
