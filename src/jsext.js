@@ -44,17 +44,16 @@ function write_obj(sock, obj) {
  * Send an error message over the socket
  * @param sock the socket to write to
  * @param message a short error message
- * @param cause a longer error message that elaborates on the first
+ * @param longMessage a longer error message that elaborates on the first
  */
-function send_error(sock, message, cause) {
+function send_error(sock, message, longMessage) {
     let err_msg = {
         "type" : ERR_MSG,
         "body" : {
             "message" : message,
-            "cause"   : cause
+            "longMessage"   : longMessage
         }
     }
-    console.log(err_msg);
     write_obj(sock, err_msg)
 }
 
@@ -64,7 +63,7 @@ function send_error(sock, message, cause) {
  * @param e the exception itself
  */
 function handle_exception(sock, e) {
-    send_error(sock, e["name"], e["message"]);
+    send_error(sock, e.message, e.stack + "\n");
 }
 
 //----------------------------Handle messages----------------------------------
