@@ -1,5 +1,7 @@
 enablePlugins(org.nlogo.build.NetLogoExtension)
 
+enablePlugins(org.nlogo.build.ExtensionDocumentationPlugin)
+
 resolvers      += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/"
 netLogoVersion := "6.2.0-d27b502"
 

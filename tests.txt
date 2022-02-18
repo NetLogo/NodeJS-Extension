@@ -20,8 +20,12 @@ all-commands
 serialization
   extensions [ js ]
   O> js:setup
-  O> js:set "a" [1 2 3]
-  js:runresult "a" => [1 2 3]
-  O> js:run "var b = {'a' : 1, 'b' : 2}"
-  js:runresult "b" => [["a" 1] ["b" 2]]
+  O> js:set "my_list" [1 2 3]
+  js:runresult "my_list" => [1 2 3]
+  O> js:run "var my_object = {'a' : 1, 'b' : 2}"
+  js:runresult "my_object" => [["a" 1] ["b" 2]]
+  O> js:run "var my_bool = true"
+  js:runresult "my_bool" => true
+  O> js:run "my_bool = false"
+  js:runresult "my_bool" => false
 
