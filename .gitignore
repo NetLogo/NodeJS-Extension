@@ -1,4 +1,5 @@
-\.*
+.bundledFiles
+.bsp/
 extensions/
 target/
 *.zip
