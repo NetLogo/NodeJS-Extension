@@ -1,7 +1,6 @@
 \.*
 extensions/
-py/
 target/
+*.zip
 *.jar
 /jsext.js
-js.zip

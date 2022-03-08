@@ -28,4 +28,3 @@ serialization
   js:runresult "my_bool" => true
   O> js:run "my_bool = false"
   js:runresult "my_bool" => false
-

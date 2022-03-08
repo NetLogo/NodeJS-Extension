@@ -1,34 +1,23 @@
-enablePlugins(org.nlogo.build.NetLogoExtension)
+import org.nlogo.build.{ ExtensionDocumentationPlugin, NetLogoExtension }
 
-enablePlugins(org.nlogo.build.ExtensionDocumentationPlugin)
+enablePlugins(NetLogoExtension)
+enablePlugins(ExtensionDocumentationPlugin)
 
-resolvers      += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/"
-netLogoVersion := "6.2.0-d27b502"
-
-netLogoClassManager := "org.nlogo.extensions.js.JSExtension"
-
-version := "0.1.0-SNAPSHOT"
-
+version    := "0.1.0"
 isSnapshot := true
 
-netLogoExtName := "js"
+netLogoVersion       := "6.2.2"
+netLogoClassManager  := "org.nlogo.extensions.js.JSExtension"
+netLogoExtName       := "js"
+netLogoPackageExtras += (baseDirectory.value / "src" / "jsext.js", None)
 
-netLogoZipSources := false
-
-netLogoTarget := org.nlogo.build.NetLogoExtension.directoryTarget(baseDirectory.value)
-
-scalaVersion := "2.12.12"
-
-scalaSource in Test := baseDirectory.value / "src" / "test"
-
+scalaVersion           := "2.12.12"
+scalaSource in Test    := baseDirectory.value / "src" / "test"
 scalaSource in Compile := baseDirectory.value / "src" / "main"
+scalacOptions         ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
-
+resolvers           += "netlogo-lang-extension" at "https://dl.cloudsmith.io/public/netlogo/netlogoextensionlanguageserverlibrary/maven"
 libraryDependencies ++= Seq(
-  "org.json4s"        %% "json4s-jackson" % "3.5.3",
-  "org.nlogo.langextension" %% "lang-extension-lib" % "0.3",
+  "org.json4s"              %% "json4s-jackson"     % "3.5.3"
+, "org.nlogo.langextension" %% "lang-extension-lib" % "0.3"
 )
-
-netLogoPackageExtras += (baseDirectory(_ / "src" / "jsext.js").value, "jsext.js")
-

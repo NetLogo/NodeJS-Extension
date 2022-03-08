@@ -91,7 +91,9 @@ object SetupNode extends api.Command {
   override def getSyntax: Syntax = Syntax.commandSyntax(right = List())
 
   override def perform(args: Array[Argument], context: Context): Unit = {
-    val jsScript: String = new File(JSExtension.extDirectory, "jsext.js").toString
+    val maybeJsFile = new File(JSExtension.extDirectory, "jsext.js")
+    val jsFile      = if (maybeJsFile.exists) { maybeJsFile } else { (new File("jsext.js")).getCanonicalFile }
+    val jsScript    = jsFile.toString
     try {
       // Wipe the slate clean
       JSExtension.killNode()
