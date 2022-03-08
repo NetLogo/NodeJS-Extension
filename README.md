@@ -10,14 +10,14 @@ Make sure your sbt is at least at version 0.13.6
 
 Run `sbt package`.
 
-If compilation succeeds, `js.jar` will be created, and the required dependencies will be copied to the root of the repository.  Copy all the `jar` files and `jsext.py` from the repository root to a `js` directory inside your NetLogo `extensions` directory.
+If compilation succeeds, `js.jar` will be created, and the required dependencies will be copied to the root of the repository.  Copy all the `jar` files and `jsext.js` from the repository root to a `js` directory inside your NetLogo `extensions` directory.
 
 ## Using
 
 To run JavaScript code you must install the Node.js runtime and have the `node` executable on your `PATH`.
-You can download Node.js from [their site](https://nodejs.org/).
+You can download Node.js from [their site](https://nodejs.org/).  Node versions 14 and 16 are supported.
 
-To use this extension, you must first include it at the top of your netlogo file.
+To use this extension, you must first include it at the top of your NetLogo model code in an `extensions` declaration.
 
 ```netlogo
 extensions [
