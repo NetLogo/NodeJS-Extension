@@ -10,6 +10,7 @@ netLogoVersion       := "6.2.2"
 netLogoClassManager  := "org.nlogo.extensions.js.JSExtension"
 netLogoExtName       := "js"
 netLogoPackageExtras += (baseDirectory.value / "src" / "jsext.js", None)
+netLogoZipExtras    ++= Seq(baseDirectory.value / "demos", baseDirectory.value / "README.md")
 
 scalaVersion           := "2.12.12"
 scalaSource in Test    := baseDirectory.value / "src" / "test"
