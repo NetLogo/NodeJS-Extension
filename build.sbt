@@ -18,6 +18,5 @@ scalacOptions         ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal
 
 resolvers           += "netlogo-lang-extension" at "https://dl.cloudsmith.io/public/netlogo/netlogoextensionlanguageserverlibrary/maven"
 libraryDependencies ++= Seq(
-  "org.json4s"              %% "json4s-jackson"     % "3.5.3"
-, "org.nlogo.langextension" %% "lang-extension-lib" % "0.3"
+  "org.nlogo.langextension" %% "lang-extension-lib" % "0.3"
 )
