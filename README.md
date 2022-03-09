@@ -133,7 +133,15 @@ JavaScript objects will convert to a NetLogo list of key-value pairs (where each
 `undefined` and `null` will be converted to `nobody`.
 Other objects will be converted to a string representation if possible and `nobody` if not.
 
+
+
 ### `js:set`
+
+```NetLogo
+js:set variable-name value
+```
+
+
 Sets a variable in the JavaScript session with the given name to the given NetLogo value.
 NetLogo objects will be converted to JavaScript objects as expected.
 
