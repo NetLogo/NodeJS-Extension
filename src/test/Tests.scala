@@ -10,4 +10,5 @@ object Tests {
 
 class Tests extends TestLanguage(Tests.testFiles) {
   System.setProperty("org.nlogo.preferHeadless", "true")
+  System.setProperty("java.awt.headless", "true")
 }

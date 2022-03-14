@@ -10,6 +10,7 @@ import org.nlogo.core.Syntax
 
 import java.awt.GraphicsEnvironment
 import java.io.File
+import java.util.Objects
 import javax.swing.JMenu
 
 // All the state is stored within the subprocess the subprocess itself is stored at the object (static in Java
@@ -42,6 +43,9 @@ object JSExtension {
     _nodeProcess.foreach(_.close())
     _nodeProcess = None
   }
+
+  def isHeadless: Boolean =
+    GraphicsEnvironment.isHeadless || Objects.equals(System.getProperty("org.nlogo.preferHeadless"), "true")
 }
 
 // The extension manager itself. Handles creating and executing the extension's primitives.
@@ -60,7 +64,7 @@ class JSExtension extends DefaultClassManager {
     super.runOnce(em)
     mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true) // configure json parser
 
-    if (!GraphicsEnvironment.isHeadless) {
+    if (!JSExtension.isHeadless) {
       JSExtension.shellWindow = Some(new ShellWindow()) // Create, but do not show, shell window. The ShellWindow
                                                         // is part of the library and is documented there
 
@@ -81,7 +85,7 @@ class JSExtension extends DefaultClassManager {
     super.unload(em);
     JSExtension.killNode() // Kill the subprocess
     JSExtension.shellWindow.foreach(sw => sw.setVisible(false)) // hide the shell window
-    if (!GraphicsEnvironment.isHeadless) {
+    if (!JSExtension.isHeadless) {
       extensionMenu.foreach(menu => App.app.frame.getJMenuBar.remove(menu)) // remove the menu bar item
     }
   }
