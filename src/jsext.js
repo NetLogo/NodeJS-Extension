@@ -22,14 +22,17 @@ global["module"] = module
 //------------------------------Utilities--------------------------------------
 
 // Input message types
+let QUIT_MSG = -1
 let STMT_MSG = 0
 let EXPR_MSG = 1
 let ASSN_MSG = 2
 let EXPR_MSG_STRINGIFIED = 3
+let HEARTBEAT_REQUEST = 4
 
 // Output message types
 let SUCC_MSG = 0
 let ERR_MSG = 1
+let HEARTBEAT_RESPONSE = 4
 
 /**
  * Serialize and write a json object to a given socket
@@ -128,29 +131,39 @@ function handle_assignment(sock, body) {
     }
 }
 
+function handle_heartbeat(sock) {
+    let out = { "type" : HEARTBEAT_RESPONSE }
+    write_obj(sock, out);
+}
+
 //------------------------------Main Server------------------------------------
 
 const server = net.createServer((sock) => {
     let rl = readline.createInterface(sock, sock);
     rl.on('line', (line) => {
         let data = JSON.parse(line);
-        if (data.hasOwnProperty("type") && data.hasOwnProperty("body")) {
+        if (data.hasOwnProperty("type")) {
             let type = data["type"];
-            let body = data["body"];
 
             try {
                 switch (type) {
+                    case QUIT_MSG:
+                        write_obj(sock, { "type": SUCC_MSG });
+                        break;
                     case STMT_MSG:
-                        handle_statement(sock, body);
+                        handle_statement(sock, data["body"]);
                         break;
                     case EXPR_MSG:
-                        handle_expression(sock, body)
+                        handle_expression(sock, data["body"])
                         break;
                     case ASSN_MSG:
-                        handle_assignment(sock, body);
+                        handle_assignment(sock, data["body"]);
                         break;
                     case EXPR_MSG_STRINGIFIED:
-                        handle_expression_stringified(sock, body);
+                        handle_expression_stringified(sock, data["body"]);
+                        break;
+                    case HEARTBEAT_REQUEST:
+                        handle_heartbeat(sock);
                         break;
                     default:
                         send_error(sock, "Bad message type:" + type, "");
@@ -160,7 +173,7 @@ const server = net.createServer((sock) => {
                 handle_exception(sock, e);
             }
         } else {
-            send_error(sock, "Bad message: no type and or body", "");
+            send_error(sock, "Bad message: no type", "");
         }
     })
 
@@ -186,4 +199,3 @@ if (process.argv.length === 3) { // If port is specified -- Useful for testing
         console.log(server.address().port); // Write the port number to stdout so the extension can connect
     })
 }
-
