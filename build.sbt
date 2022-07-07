@@ -17,7 +17,7 @@ scalaSource in Test    := baseDirectory.value / "src" / "test"
 scalaSource in Compile := baseDirectory.value / "src" / "main"
 scalacOptions         ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
-resolvers           += "netlogo-lang-extension" at "https://dl.cloudsmith.io/public/netlogo/netlogoextensionlanguageserverlibrary/maven"
+resolvers           += "netlogo-language-library" at "https://dl.cloudsmith.io/public/netlogo/language-library/maven"
 libraryDependencies ++= Seq(
-  "org.nlogo.langextension" %% "lang-extension-lib" % "0.4.0"
+  "org.nlogo.languagelibrary" %% "language-library" % "1.0.0"
 )
