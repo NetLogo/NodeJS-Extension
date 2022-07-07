@@ -1,28 +1,27 @@
 package org.nlogo.extensions.js
 
+import java.io.File
+
 import com.fasterxml.jackson.core.JsonParser
 import org.json4s.jackson.JsonMethods.mapper
-import org.nlogo.languagelibrary.{ ShellWindow, Subprocess }
+
+import org.nlogo.languagelibrary.Subprocess
+import org.nlogo.languagelibrary.config.{ Config, Menu }
 import org.nlogo.api
 import org.nlogo.api._
-import org.nlogo.app.App
 import org.nlogo.core.Syntax
-
-import java.awt.GraphicsEnvironment
-import java.io.File
-import java.util.Objects
-import javax.swing.JMenu
 
 // All the state is stored within the subprocess the subprocess itself is stored at the object (static in Java
 // terminology) level.
-object JSExtension {
-  private var _nodeProcess: Option[Subprocess] = None
-  var shellWindow : Option[ShellWindow] = None
+object NodeJSExtension {
+  val codeName   = "js"
+  val longName   = "NodeJS Extension"
+  val extLangBin = "node"
 
-  // The directory where the .js file is located
-  val extDirectory: File = new File(
-    getClass.getClassLoader.asInstanceOf[java.net.URLClassLoader].getURLs()(0).toURI.getPath
-  ).getParentFile
+  var menu: Option[Menu] = None
+  val config: Config     = Config.createForPropertyFile(classOf[NodeJSExtension], NodeJSExtension.codeName)
+
+  private var _nodeProcess: Option[Subprocess] = None
 
   // Get nodejs process, fail if not started yet
   def nodeProcess: Subprocess =
@@ -31,7 +30,7 @@ object JSExtension {
     )))
 
   // Set the current nodejs process, closing the prior one if need be
-  // This is a Scala setter method that automatically gets called when you write JSExtension.nodeProcess = <something>
+  // This is a Scala setter method that automatically gets called when you write NodeJSExtension.nodeProcess = <something>
   // See https://www.oreilly.com/library/view/scala-cookbook/9781449340292/ch04s07.html for more
   def nodeProcess_=(proc: Subprocess): Unit = {
     _nodeProcess.foreach(_.close())
@@ -44,14 +43,10 @@ object JSExtension {
     _nodeProcess = None
   }
 
-  def isHeadless: Boolean =
-    GraphicsEnvironment.isHeadless || Objects.equals(System.getProperty("org.nlogo.preferHeadless"), "true")
 }
 
 // The extension manager itself. Handles creating and executing the extension's primitives.
-class JSExtension extends DefaultClassManager {
-  var extensionMenu: Option[JMenu] = None // The menu bar item for this extension
-
+class NodeJSExtension extends DefaultClassManager {
   def load(manager: PrimitiveManager): Unit = { // add all this extension's primitives
     manager.addPrimitive("setup", SetupNode)
     manager.addPrimitive("run", Run)
@@ -64,30 +59,14 @@ class JSExtension extends DefaultClassManager {
     super.runOnce(em)
     mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true) // configure json parser
 
-    if (!JSExtension.isHeadless) {
-      JSExtension.shellWindow = Some(new ShellWindow()) // Create, but do not show, shell window. The ShellWindow
-                                                        // is part of the library and is documented there
-
-      // Try to find a menu item with the right name
-      val menuBar = App.app.frame.getJMenuBar
-      val maybeMenuItem = menuBar.getComponents.collectFirst{
-        case mi: JMenu if mi.getText == ExtensionMenu.name => mi
-      }
-      // If unable to find one, create a new menu bar item
-      if (maybeMenuItem.isEmpty) {
-        extensionMenu = Option(menuBar.add(new ExtensionMenu))
-      }
-    }
+    NodeJSExtension.menu = Menu.create(NodeJSExtension.longName, NodeJSExtension.extLangBin, NodeJSExtension.config)
   }
 
   // Teardown on extension unload
   override def unload(em: ExtensionManager): Unit = {
-    super.unload(em);
-    JSExtension.killNode() // Kill the subprocess
-    JSExtension.shellWindow.foreach(sw => sw.setVisible(false)) // hide the shell window
-    if (!JSExtension.isHeadless) {
-      extensionMenu.foreach(menu => App.app.frame.getJMenuBar.remove(menu)) // remove the menu bar item
-    }
+    super.unload(em)
+    NodeJSExtension.killNode() // Kill the subprocess
+    NodeJSExtension.menu.foreach(_.unload()) // remove the menu bar item
   }
 }
 
@@ -95,18 +74,29 @@ object SetupNode extends api.Command {
   override def getSyntax: Syntax = Syntax.commandSyntax(right = List())
 
   override def perform(args: Array[Argument], context: Context): Unit = {
-    val maybeJsFile = new File(JSExtension.extDirectory, "jsext.js")
-    val jsFile      = if (maybeJsFile.exists) { maybeJsFile } else { (new File("jsext.js")).getCanonicalFile }
-    val jsScript    = jsFile.toString
+    val nodeJsExtensionDirectory = Config.getExtensionRuntimeDirectory(classOf[NodeJSExtension], NodeJSExtension.codeName)
+    val maybeJsFile              = new File(nodeJsExtensionDirectory, "jsext.js")
+    val jsFile                   = if (maybeJsFile.exists) { maybeJsFile } else { (new File("jsext.js")).getCanonicalFile }
+    val jsScript                 = jsFile.toString
+
+    val maybeJsRuntimePath   = Config.getRuntimePath(
+        NodeJSExtension.extLangBin
+      , NodeJSExtension.config.runtimePath.getOrElse("")
+      , "--version"
+    )
+    val jsRuntimePath = maybeJsRuntimePath.getOrElse(
+      throw new ExtensionException(s"We couldn't find a Node.js executable file to run.  Please make sure Node.js is installed on your system.  Then you can tell the ${NodeJSExtension.longName} where it's located by opening the NodeJS Extension menu and selecting Configure to choose the location yourself or putting making sure ${NodeJSExtension.extLangBin} is available on your PATH.\n")
+    )
+
     try {
       // Wipe the slate clean
-      JSExtension.killNode()
+      NodeJSExtension.killNode()
       // Start the subprocess with the current workspace, the executable to be run, any args to be passed in,
       // and the name of the extension, and a longer name for the extension, both for more helpful error messages
-      JSExtension.nodeProcess = Subprocess.start(context.workspace, Seq("node"), Seq(jsScript), "js", "Node.js Javascript")
+      NodeJSExtension.nodeProcess = Subprocess.start(context.workspace, Seq(jsRuntimePath), Seq(jsScript), "js", "Node.js Javascript")
       // Set the method that the shell window will call to evaluate expressions. In this case, we just go straight
       // to the evalStringified method of the subprocess
-      JSExtension.shellWindow.foreach(sw => sw.setEvalStringified(Some(JSExtension.nodeProcess.evalStringified)))
+      NodeJSExtension.menu.foreach(_.setup(NodeJSExtension.nodeProcess.evalStringified))
     } catch {
       case e: Exception => {
         throw new ExtensionException("The subprocess didn't want to start", e)
@@ -122,7 +112,7 @@ object Run extends api.Command {
   )
 
   override def perform(args: Array[Argument], context: Context): Unit =
-    JSExtension.nodeProcess.exec(args.map(_.getString).mkString("\n"))
+    NodeJSExtension.nodeProcess.exec(args.map(_.getString).mkString("\n"))
 }
 
 object RunResult extends api.Reporter {
@@ -132,7 +122,7 @@ object RunResult extends api.Reporter {
   )
 
   override def report(args: Array[Argument], context: Context): AnyRef =
-    JSExtension.nodeProcess.eval(args.map(_.getString).mkString("\n"))
+    NodeJSExtension.nodeProcess.eval(args.map(_.getString).mkString("\n"))
 }
 
 object Set extends api.Command {
@@ -140,16 +130,5 @@ object Set extends api.Command {
   // agents, agentSets, and everything in Syntax.ReadableType
   override def getSyntax: Syntax = Syntax.commandSyntax(right = List(Syntax.StringType, Subprocess.convertibleTypesSyntax))
   override def perform(args: Array[Argument], context: Context): Unit =
-    JSExtension.nodeProcess.assign(args(0).getString, args(1).get)
-}
-
-object ExtensionMenu {
-  val name = "JSExtension"
-}
-
-// The extension menu bar item. In this case, it just has the one drop down item, toggling the interactive JS console.
-class ExtensionMenu extends JMenu("JSExtension") {
-  add("Interactive JS Console").addActionListener{ _ =>
-    JSExtension.shellWindow.map(sw => sw.setVisible(!sw.isVisible))
-  }
+    NodeJSExtension.nodeProcess.assign(args(0).getString, args(1).get)
 }
