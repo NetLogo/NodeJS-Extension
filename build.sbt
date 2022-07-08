@@ -2,7 +2,8 @@ import org.nlogo.build.{ ExtensionDocumentationPlugin, NetLogoExtension }
 
 enablePlugins(ExtensionDocumentationPlugin, NetLogoExtension)
 
-version    := "0.1.0"
+name       := "NodeJS Extension"
+version    := "0.1.1"
 isSnapshot := true
 
 scalaVersion           := "2.12.12"
