@@ -59,7 +59,7 @@ class NodeJSExtension extends DefaultClassManager {
     super.runOnce(em)
     mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true) // configure json parser
 
-    NodeJSExtension.menu = Menu.create(NodeJSExtension.longName, NodeJSExtension.extLangBin, NodeJSExtension.config)
+    NodeJSExtension.menu = Menu.create(em, NodeJSExtension.longName, NodeJSExtension.extLangBin, NodeJSExtension.config)
   }
 
   // Teardown on extension unload
