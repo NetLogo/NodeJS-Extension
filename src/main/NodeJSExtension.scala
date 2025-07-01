@@ -3,7 +3,8 @@ package org.nlogo.extensions.js
 import java.io.File
 
 import com.fasterxml.jackson.core.JsonParser
-import org.json4s.jackson.JsonMethods.mapper
+import com.fasterxml.jackson.core.json.JsonReadFeature
+import com.fasterxml.jackson.databind.json.JsonMapper
 
 import org.nlogo.languagelibrary.Subprocess
 import org.nlogo.languagelibrary.config.{ Config, Menu }
@@ -57,7 +58,7 @@ class NodeJSExtension extends DefaultClassManager {
   // One time init for this extension.
   override def runOnce(em: ExtensionManager): Unit = {
     super.runOnce(em)
-    mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true) // configure json parser
+    JsonMapper.builder().enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS).build() // configure json parser
 
     NodeJSExtension.menu = Menu.create(em, NodeJSExtension.longName, NodeJSExtension.extLangBin, NodeJSExtension.config)
   }

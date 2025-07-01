@@ -6,12 +6,13 @@ name       := "NodeJS Extension"
 version    := "0.2.0"
 isSnapshot := true
 
-scalaVersion          := "2.12.12"
+scalaVersion          := "3.7.0"
+
 Test / scalaSource    := baseDirectory.value / "src" / "test"
 Compile / scalaSource := baseDirectory.value / "src" / "main"
-scalacOptions        ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint")
+scalacOptions        ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-release", "17")
 
-netLogoVersion       := "6.3.0"
+netLogoVersion       := "7.0.0-beta2-4fe3739" // This extension gets its NL version from language-library; any update to its NL version has to be mirrored in that package and published in a new version --Jason B. (7/1/25)
 netLogoClassManager  := "org.nlogo.extensions.js.NodeJSExtension"
 netLogoExtName       := "js"
 netLogoPackageExtras += (baseDirectory.value / "src" / "jsext.js", None)
@@ -25,5 +26,5 @@ Compile / packageBin / artifactPath := {
 
 resolvers           += "netlogo-language-library" at "https://dl.cloudsmith.io/public/netlogo/language-library/maven"
 libraryDependencies ++= Seq(
-  "org.nlogo.languagelibrary" %% "language-library" % "2.4.0"
+  "org.nlogo.languagelibrary" %% "language-library" % "3.3.0"
 )
