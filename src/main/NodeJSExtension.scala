@@ -2,7 +2,6 @@ package org.nlogo.extensions.js
 
 import java.io.File
 
-import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.json.JsonReadFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 
